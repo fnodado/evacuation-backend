@@ -12,7 +12,7 @@ import java.util.*;
 public class PredictionService {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private static final String PYTHON_DIR = "C:\\Users\\USER\\Documents\\thesis\\evacuation-python";
+    private static final String PYTHON_DIR = ".";
 
     public String predictCongestion(Zone zone) {
         try {
