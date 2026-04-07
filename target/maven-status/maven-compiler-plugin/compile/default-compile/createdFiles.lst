@@ -1,0 +1,5 @@
+com\evacuation\model\Zone.class
+com\evacuation\model\PredictionResult.class
+com\evacuation\controller\PredictionController.class
+com\evacuation\EvacuationApplication.class
+com\evacuation\service\PredictionService.class
