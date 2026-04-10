@@ -6,13 +6,47 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.nio.file.*;
 import java.util.*;
 
 @Service
 public class PredictionService {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private static final String PYTHON_DIR = ".";
+
+    private String findPythonCommand() {
+        String[] candidates = {"python3.11", "python3", "python"};
+        for (String cmd : candidates) {
+            try {
+                ProcessBuilder pb = new ProcessBuilder(cmd, "--version");
+                pb.redirectErrorStream(true);
+                Process p = pb.start();
+                p.waitFor();
+                System.out.println("Found Python command: " + cmd);
+                return cmd;
+            } catch (Exception e) {
+                System.out.println("Python command not found: " + cmd);
+            }
+        }
+        return "python3";
+    }
+
+    private String findPythonDir() {
+        // Check current directory first (Railway deployment)
+        File currentDir = new File(".");
+        if (new File(currentDir, "predict.py").exists()) {
+            System.out.println("Found predict.py in current dir: " + currentDir.getAbsolutePath());
+            return ".";
+        }
+        // Check /app directory (Railway container)
+        File appDir = new File("/app");
+        if (new File(appDir, "predict.py").exists()) {
+            System.out.println("Found predict.py in /app");
+            return "/app";
+        }
+        System.out.println("predict.py not found, using current dir");
+        return ".";
+    }
 
     public String predictCongestion(Zone zone) {
         try {
@@ -27,11 +61,11 @@ public class PredictionService {
             String inputJson = objectMapper.writeValueAsString(input);
             System.out.println("Calling Python with: " + inputJson);
 
-            ProcessBuilder pb = new ProcessBuilder(
-                
-                "python3", "predict.py", inputJson
-            );
-            pb.directory(new File(PYTHON_DIR));
+            String pythonCmd = findPythonCommand();
+            String pythonDir = findPythonDir();
+
+            ProcessBuilder pb = new ProcessBuilder(pythonCmd, "predict.py", inputJson);
+            pb.directory(new File(pythonDir));
             pb.redirectErrorStream(true);
 
             Process process = pb.start();
@@ -73,6 +107,8 @@ public class PredictionService {
     }
 
     private String fallbackPrediction(Zone zone) {
+        System.out.println("Using fallback prediction for zone: " +
+            (zone.getName() != null ? zone.getName() : "unknown"));
         if (zone.getEmergencyFlag() != null && zone.getEmergencyFlag()) {
             String type = zone.getZoneType() != null ? zone.getZoneType() : "";
             switch (type) {
