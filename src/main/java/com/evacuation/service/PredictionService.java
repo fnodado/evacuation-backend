@@ -28,8 +28,8 @@ public class PredictionService {
             System.out.println("Calling Python with: " + inputJson);
 
             ProcessBuilder pb = new ProcessBuilder(
-                "cmd.exe", "/c",
-                "py", "-3.11", "predict.py", inputJson
+                
+                "python3", "predict.py", inputJson
             );
             pb.directory(new File(PYTHON_DIR));
             pb.redirectErrorStream(true);
