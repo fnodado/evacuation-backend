@@ -1,0 +1,384 @@
+{
+  "info": {
+    "name": "Evacuation System API",
+    "description": "API tests for the Spring Boot evacuation backend with MySQL and JWT authentication",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "jwtToken",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "item": [
+        {
+          "name": "GET Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "health"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "POST Register Admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@test.com\",\n  \"password\": \"admin123\",\n  \"full_name\": \"Admin User\",\n  \"id_number\": \"ADMIN001\",\n  \"role\": \"admin\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('jwtToken', response.token);",
+                  "    console.log('JWT Token saved:', response.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@test.com\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Me (Authenticated)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwtToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "me"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Buildings",
+      "item": [
+        {
+          "name": "GET All Buildings",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwtToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/buildings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "buildings"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST Create Building",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwtToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Main Building\",\n  \"address\": \"123 University Ave\",\n  \"total_capacity\": 1000\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/buildings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "buildings"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Zones",
+      "item": [
+        {
+          "name": "GET Zones by Building",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwtToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/zones/{{buildingId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "zones", "{{buildingId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST Save Zones",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwtToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"building_id\": \"{{buildingId}}\",\n  \"zones\": [\n    {\n      \"name\": \"Lobby\",\n      \"zone_type\": \"lobby\",\n      \"max_capacity\": 100,\n      \"is_exit\": false,\n      \"coordinates\": [[0,0], [10,0], [10,10], [0,10]]\n    },\n    {\n      \"name\": \"Main Exit\",\n      \"zone_type\": \"exit\",\n      \"max_capacity\": 50,\n      \"is_exit\": true,\n      \"coordinates\": [[20,0], [30,0], [30,5], [20,5]]\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/zones/save",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "zones", "save"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Occupancy",
+      "item": [
+        {
+          "name": "GET Occupancy by Building",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwtToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/occupancy/{{buildingId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "occupancy", "{{buildingId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST Check In",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwtToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"zone_id\": \"{{zoneId}}\",\n  \"building_id\": \"{{buildingId}}\",\n  \"full_name\": \"John Doe\",\n  \"id_number\": \"STUD001\",\n  \"role\": \"student\",\n  \"email\": \"john@test.com\",\n  \"mobile_number\": \"+1234567890\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/occupancy/checkin",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "occupancy", "checkin"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT Mark Safe",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwtToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"is_safe\": true,\n  \"situation_note\": \"Evacuated safely\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/occupancy/{{occupancyId}}/safe",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "occupancy", "{{occupancyId}}", "safe"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Occupancy Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwtToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/occupancy/stats/{{buildingId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "occupancy", "stats", "{{buildingId}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Prediction",
+      "item": [
+        {
+          "name": "POST Predict Congestion",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"zone-1\",\n  \"name\": \"Lobby\",\n  \"zone_type\": \"lobby\",\n  \"max_capacity\": 100,\n  \"is_exit\": false,\n  \"people_count\": 50,\n  \"movement_speed\": \"normal\",\n  \"time_of_day\": \"12:00\",\n  \"emergency_flag\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/predict",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "predict"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST Trigger Earthquake",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"zones\": [\n    {\n      \"id\": \"zone-1\",\n      \"name\": \"Lobby\",\n      \"zone_type\": \"lobby\",\n      \"max_capacity\": 100,\n      \"is_exit\": false,\n      \"people_count\": 80,\n      \"movement_speed\": \"fast\",\n      \"emergency_flag\": true\n    },\n    {\n      \"id\": \"zone-2\",\n      \"name\": \"Main Exit\",\n      \"zone_type\": \"exit\",\n      \"max_capacity\": 50,\n      \"is_exit\": true,\n      \"people_count\": 30,\n      \"movement_speed\": \"fast\",\n      \"emergency_flag\": true\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/trigger/earthquake",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trigger", "earthquake"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "POST Notify Earthquake",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwtToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/notify/earthquake/{{buildingId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notify", "earthquake", "{{buildingId}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

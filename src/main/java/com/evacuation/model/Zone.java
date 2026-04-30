@@ -1,62 +1,52 @@
 package com.evacuation.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
+import java.time.LocalDateTime;
+
+// Transient prediction fields (not persisted, used by PredictionService and earthquake flow)
+
+@Entity
+@Table(name = "zones")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Zone {
+
+    @Id
     private String id;
+
     private String buildingId;
+    private String floorId;
     private String name;
-
-    @JsonProperty("zone_type")
     private String zoneType;
-
-    @JsonProperty("max_capacity")
     private Integer maxCapacity;
+    private String position;
+    private Boolean isExit = false;
+    private Boolean isAssemblyPoint = false;
 
-    @JsonProperty("is_exit")
-    private Boolean isExit;
+    @Enumerated(EnumType.STRING)
+    private ZoneStatus status = ZoneStatus.PENDING;
 
-    @JsonProperty("people_count")
-    private Integer peopleCount;
+    private String qrCodeUrl;
 
-    @JsonProperty("movement_speed")
-    private String movementSpeed;
+    @Column(columnDefinition = "TEXT")
+    private String coordinates;
 
-    @JsonProperty("time_of_day")
-    private String timeOfDay;
+    @CreationTimestamp
+    private LocalDateTime createdAt;
 
-    @JsonProperty("emergency_flag")
-    private Boolean emergencyFlag;
+    // Transient fields used only by PredictionService — not stored in DB
+    @Transient private Integer peopleCount;
+    @Transient private String movementSpeed;
+    @Transient private String timeOfDay;
+    @Transient private Boolean emergencyFlag;
 
-    public Zone() {}
-
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
-
-    public String getBuildingId() { return buildingId; }
-    public void setBuildingId(String buildingId) { this.buildingId = buildingId; }
-
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-
-    public String getZoneType() { return zoneType; }
-    public void setZoneType(String zoneType) { this.zoneType = zoneType; }
-
-    public Integer getMaxCapacity() { return maxCapacity; }
-    public void setMaxCapacity(Integer maxCapacity) { this.maxCapacity = maxCapacity; }
-
-    public Boolean getIsExit() { return isExit; }
-    public void setIsExit(Boolean isExit) { this.isExit = isExit; }
-
-    public Integer getPeopleCount() { return peopleCount; }
-    public void setPeopleCount(Integer peopleCount) { this.peopleCount = peopleCount; }
-
-    public String getMovementSpeed() { return movementSpeed; }
-    public void setMovementSpeed(String movementSpeed) { this.movementSpeed = movementSpeed; }
-
-    public String getTimeOfDay() { return timeOfDay; }
-    public void setTimeOfDay(String timeOfDay) { this.timeOfDay = timeOfDay; }
-
-    public Boolean getEmergencyFlag() { return emergencyFlag; }
-    public void setEmergencyFlag(Boolean emergencyFlag) { this.emergencyFlag = emergencyFlag; }
+    public enum ZoneStatus {
+        PENDING, CONFIRMED, ACTIVE
+    }
 }

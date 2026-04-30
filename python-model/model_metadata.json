@@ -1,0 +1,22 @@
+{
+  "algorithm": "RandomForestClassifier",
+  "n_estimators": 200,
+  "max_depth": 15,
+  "features": 7,
+  "feature_names": [
+    "people_count",
+    "max_capacity",
+    "density_ratio",
+    "zone_type_enc",
+    "movement_speed_enc",
+    "hour",
+    "emergency_flag"
+  ],
+  "classes": [
+    "Critical",
+    "High",
+    "Low",
+    "Moderate"
+  ],
+  "training_samples": 10000
+}
